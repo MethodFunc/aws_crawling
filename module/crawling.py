@@ -1,11 +1,21 @@
-import requests
-from bs4 import BeautifulSoup as bs
+try:
+    import requests
+except ModuleNotFoundError:
+    raise ModuleNotFoundError('requests library is not found.\n'
+                              'Please install requests\n'
+                              'pip install requests')
+try:
+    from bs4 import BeautifulSoup as bs
+except ModuleNotFoundError:
+    raise ModuleNotFoundError('Beautifulsoup library is not found.\n'
+                              'Please install Beautifulsoup\n'
+                              'pip install bs4')
 from datetime import datetime, timedelta
 
-from ..setting import datadict
+from setting import datadict
 
 
-def get_result(url, date):
+def aws_table(url, date):
     data_dict = datadict()
     response = requests.get(url)
     contents = bs(response.content, 'html.parser', from_encoding='cp949')

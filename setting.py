@@ -1,16 +1,14 @@
 import logging
 import argparse
+from datetime import datetime
 
 
 def arg_setting():
     parser = argparse.ArgumentParser()
     args = parser.parse_args("")
 
-    args.year = 2022
-    args.month = 10
-    args.day = 5
-    args.hour = 1
-    args.range_date = 395
+    args.start_date = '2021-10-05'
+    args.end_date = datetime.now().strftime("%Y-%m-%d %H")
     args.output_path = './aws_output'
 
     return args

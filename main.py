@@ -1,12 +1,17 @@
-import warnings
 import json
+import warnings
 import pandas as pd
 from pathlib import Path
-from setting import logger
-from datetime import datetime, timedelta
-from joblib import Parallel, delayed
-from module.crawling import get_result, arg_setting
-
+from datetime import datetime
+try:
+    from joblib import Parallel, delayed
+except ModuleNotFoundError:
+    raise ModuleNotFoundError('joblib library is not found.\n'
+                              'Please install joblib\n'
+                              'pip install joblib')
+from module.crawling import aws_table
+from module.tools import calc_daterange
+from setting import logger, arg_setting
 
 warnings.filterwarnings('ignore')
 
@@ -16,11 +21,7 @@ def main(args):
     data = ...
     data = json.loads(data)
     aws_info = pd.DataFrame(data)
-
-    date_list = [
-        (datetime(args.year, args.month, args.day, args.hour) + timedelta(hours=i)).strftime("%Y%m%d%H%M")
-        for i in range(args.range_date * 24)
-    ]
+    date_list = calc_daterange(args)
 
     total_start = datetime.now()
     for _, value in aws_info.iterrows():
@@ -32,7 +33,7 @@ def main(args):
         logger.info(f'{value["지역명"]} 크롤링 시작')
 
         with Parallel(n_jobs=-1) as parallel:
-            result = parallel(delayed(get_result)(url, dt) for url, dt in zip(urls, date_list))
+            result = parallel(delayed(aws_table)(url, dt) for url, dt in zip(urls, date_list))
 
         dataframe = pd.concat(result, ignore_index=True)
         dataframe['dt'] = pd.to_datetime(dataframe['dt'])
